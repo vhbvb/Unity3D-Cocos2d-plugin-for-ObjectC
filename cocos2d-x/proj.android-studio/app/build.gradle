@@ -1,0 +1,94 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+apply plugin: 'com.android.application'
+apply from: 'build-mix.gradle'
+android {
+    compileSdkVersion 22
+    buildToolsVersion "25.0.0"
+
+    defaultConfig {
+        applicationId "com.mob.paysdk.demo"
+        minSdkVersion 10
+        targetSdkVersion 16
+        versionCode 200
+        versionName "2.0.0"
+
+        externalNativeBuild {
+            ndkBuild {
+                targets 'MyGame'
+                arguments 'NDK_TOOLCHAIN_VERSION=4.9'
+                arguments 'APP_PLATFORM=android-16'
+                arguments "NDK_APPLICATION_MK=jni/Application.mk"
+                def module_paths = [project.file("../../cocos2d").absolutePath,
+                                    project.file("../../cocos2d/cocos").absolutePath,
+                                    project.file("../../cocos2d/external").absolutePath]
+                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                    // should use '/'
+                    module_paths = module_paths.collect {it.replaceAll('\\\\', '/')}
+                    arguments 'NDK_MODULE_PATH=' + module_paths.join(";")
+                }
+                else {
+                    arguments 'NDK_MODULE_PATH=' + module_paths.join(':')
+                }
+
+                arguments '-j' + Runtime.runtime.availableProcessors()
+                abiFilters.addAll("arm64-v8a".split("\\ "))
+            }
+        }
+    }
+
+    sourceSets.main {
+        java.srcDir "src"
+        res.srcDir "res"
+        manifest.srcFile "AndroidManifest.xml"
+        assets.srcDir "../../Resources"
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path "jni/Android.mk"
+        }
+    }
+
+    signingConfigs {
+        config {
+            storeFile file("demokey.keystore")
+            storePassword "123456"
+            keyAlias "demokey.keystore"
+            keyPassword "123456"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.config
+            zipAlignEnabled true
+
+            externalNativeBuild {
+                ndkBuild {
+                    arguments 'NDK_DEBUG=0'
+                }
+            }
+        }
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.config
+            externalNativeBuild {
+                ndkBuild {
+                    arguments 'NDK_DEBUG=1'
+                }
+            }
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile project(':libcocos2dx')
+    compile project(':Cocos2dxBridge')
+}

@@ -1,0 +1,15 @@
+include ':libcocos2dx', ":Cocos2dxBridge"
+project(':libcocos2dx').projectDir = new File(settingsDir, '../cocos2d/cocos/platform/android/libcocos2dx')
+
+
+//include ':MobTools'
+//project(':MobTools').projectDir = new File('D:/workspace/ShareSDKTools')
+//
+//include ':MobCommons'
+//project(':MobCommons').projectDir = new File('D:/workspace/MobCommons')
+//
+//include ':PaySDK'
+//project(':PaySDK').projectDir = new File('D:/workspace/PaySDK/branches/release-1.0.0/PaySDK')
+
+include ':Cocos2D-For-PaySDK'
+project(':Cocos2D-For-PaySDK').projectDir = new File(settingsDir, 'app')
